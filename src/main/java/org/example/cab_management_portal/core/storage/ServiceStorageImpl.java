@@ -11,7 +11,6 @@ import org.example.cab_management_portal.models.CabState;
 import org.example.cab_management_portal.models.dao.Cab;
 import org.example.cab_management_portal.models.dao.LocationUpdate;
 import org.example.cab_management_portal.models.dao.StatusUpdate;
-import org.example.cab_management_portal.utils.GsonUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -64,7 +63,6 @@ public class ServiceStorageImpl implements ServiceStorage {
         _cityLevelIdleCabs.get(cab.getCity()).offer(cab);
         _allCabs.put(cab.getRegistrationNumber(), cab);
 
-        analyticsStorage.updateCabIdleStatus(cab, CabState.IDLE_START);
         analyticsStorage.updateCabStatus(cab);
 
         return true;
@@ -152,11 +150,6 @@ public class ServiceStorageImpl implements ServiceStorage {
 
         if(cab.getState().equals(CabState.IDLE)) {
             _cityLevelIdleCabs.get(cab.getCity()).offer(cab);
-            analyticsStorage.updateCabIdleStatus(cab, CabState.IDLE_START);
-        }
-
-        if(cab.getState().equals(CabState.TRIP_ASSIGNED))  {
-            analyticsStorage.updateCabIdleStatus(cab, CabState.IDLE_END);
         }
 
         return true;
@@ -185,7 +178,6 @@ public class ServiceStorageImpl implements ServiceStorage {
 
         _allCabs.put(bookedCab.getRegistrationNumber(), bookedCab);
         analyticsStorage.updateCabStatus(bookedCab);
-        analyticsStorage.updateCabIdleStatus(bookedCab, CabState.IDLE_END);
 
         return bookedCab;
     }

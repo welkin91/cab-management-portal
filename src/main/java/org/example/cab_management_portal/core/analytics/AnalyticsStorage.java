@@ -11,8 +11,6 @@ public interface AnalyticsStorage {
 
     public void init();
 
-    public boolean updateCabIdleStatus(Cab cab, CabState state);
-
     public boolean updateCabStatus(Cab cab);
 
     public Long getCabIdleTimeInMillis(String registrationNumber, Long startTime, Long endTime) throws AnalyticsException;

@@ -3,12 +3,10 @@ package org.example.cab_management_portal.core.analytics;
 import lombok.extern.slf4j.Slf4j;
 import org.example.cab_management_portal.exceptions.AnalyticsException;
 import org.example.cab_management_portal.exceptions.TransformationException;
-import org.example.cab_management_portal.models.CabState;
 import org.example.cab_management_portal.models.dao.Cab;
 import org.example.cab_management_portal.models.dao.CabEntry;
 import org.example.cab_management_portal.service.transformers.CabTransformer;
 import org.example.cab_management_portal.utils.CommonUtils;
-import org.example.cab_management_portal.utils.GsonUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -27,40 +25,11 @@ public class AnalyticsStorageImpl implements AnalyticsStorage {
     @Autowired
     CabTransformer cabTransformer;
 
-    Map<String, ConcurrentNavigableMap<Long, CabEntry>> _idleCabs;
     Map<String, ConcurrentNavigableMap<Long, CabEntry>> _allStates;
 
     @Override
     public void init() {
-        _idleCabs = new ConcurrentHashMap<>();
         _allStates = new ConcurrentHashMap<>();
-    }
-
-    @Override
-    public boolean updateCabIdleStatus(Cab cab, CabState state) {
-        if(cab == null || CommonUtils.isEmpty(cab.getRegistrationNumber())) {
-            return false;
-        }
-
-        String registrationNumber = cab.getRegistrationNumber();
-        if(!_idleCabs.containsKey(registrationNumber)) {
-            _idleCabs.put(registrationNumber, new ConcurrentSkipListMap<>());
-        }
-
-        CabEntry entry = null;
-        try {
-            entry = cabTransformer.transformIntoEntry(cab, state);
-        } catch (TransformationException exception) {
-            log.error("Error while transforming into Cab Entry object. error: {}", exception.getMessage());
-        }
-
-        if(entry == null) {
-            return false;
-        }
-
-        _idleCabs.get(registrationNumber).put(entry.getLastUpdatedAt(), entry);
-
-        return true;
     }
 
     @Override
@@ -105,14 +74,14 @@ public class AnalyticsStorageImpl implements AnalyticsStorage {
             throw new AnalyticsException("Cab Id can not be empty.");
         }
 
-        if(!_idleCabs.containsKey(registrationNumber)) {
+        if(!_allStates.containsKey(registrationNumber)) {
             throw new AnalyticsException("No data present for cabId: '" + registrationNumber + "'.");
         }
 
         ConcurrentNavigableMap<Long, CabEntry> timeIntervals = null;
 
         try {
-            timeIntervals = _idleCabs.get(registrationNumber).subMap(startTime, true, endTime, true);
+            timeIntervals = _allStates.get(registrationNumber).subMap(startTime, true, endTime, true);
         }
         catch (Exception e) {
             throw new AnalyticsException("Something went wrong. error: " + e.toString());
@@ -180,22 +149,20 @@ public class AnalyticsStorageImpl implements AnalyticsStorage {
 
         while (iterator.hasNext()) {
             Long time = (Long) iterator.next();
-            CabEntry entry = _idleCabs.get(registrationNumber).get(time);
+            CabEntry entry = _allStates.get(registrationNumber).get(time);
 
             switch (entry.getState()) {
-                case IDLE_START:
+                case IDLE:
                     start = entry;
                     break;
 
-                case IDLE_END:
+                case TRIP_ASSIGNED:
                     end = entry;
                     response += getTimeDiff(start, end);
                     start = null;
                     end = null;
                     break;
             }
-
-            log.error(GsonUtils.toPrettyString(entry));
         }
 
         if(start != null) {
