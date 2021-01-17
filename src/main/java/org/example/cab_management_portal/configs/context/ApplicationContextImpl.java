@@ -3,6 +3,7 @@ package org.example.cab_management_portal.configs.context;
 
 import com.google.maps.GeoApiContext;
 import lombok.extern.slf4j.Slf4j;
+import org.example.cab_management_portal.core.analytics.AnalyticsStorage;
 import org.example.cab_management_portal.core.state_machine.core.impl.CabStateMachine;
 import org.example.cab_management_portal.core.storage.ServiceStorage;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,9 @@ public class ApplicationContextImpl implements ApplicationContext {
 
     @Autowired
     CabStateMachine stateMachine;
+
+    @Autowired
+    AnalyticsStorage analyticsStorage;
 
     @Override
     public void initGoogleClient() {
@@ -38,6 +42,11 @@ public class ApplicationContextImpl implements ApplicationContext {
     @Override
     public void initStateMachine() {
         stateMachine.configure();
+    }
+
+    @Override
+    public void initAnalyticsStorage() {
+        analyticsStorage.init();
     }
 
     @Override

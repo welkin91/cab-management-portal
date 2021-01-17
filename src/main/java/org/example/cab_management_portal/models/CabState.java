@@ -4,7 +4,10 @@ public enum CabState {
 
     IDLE("idle"),
     TRIP_ASSIGNED("trip_assigned"),
-    ON_TRIP("on_trip");
+    ON_TRIP("on_trip"),
+
+    IDLE_START("idle.start"),
+    IDLE_END("idle.end");
 
     private final String desc;
 

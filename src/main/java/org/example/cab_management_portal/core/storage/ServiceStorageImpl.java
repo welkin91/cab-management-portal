@@ -1,6 +1,7 @@
 package org.example.cab_management_portal.core.storage;
 
 import lombok.extern.slf4j.Slf4j;
+import org.example.cab_management_portal.core.analytics.AnalyticsStorage;
 import org.example.cab_management_portal.core.state_machine.core.impl.CabStateMachine;
 import org.example.cab_management_portal.exceptions.LocationException;
 import org.example.cab_management_portal.exceptions.RegistrationException;
@@ -32,6 +33,9 @@ public class ServiceStorageImpl implements ServiceStorage {
     @Autowired
     CabStateMachine stateMachine;
 
+    @Autowired
+    AnalyticsStorage analyticsStorage;
+
     @Override
     public void init() {
         _allCabs = new ConcurrentHashMap<>();
@@ -59,6 +63,8 @@ public class ServiceStorageImpl implements ServiceStorage {
 
         _cityLevelIdleCabs.get(cab.getCity()).offer(cab);
         _allCabs.put(cab.getRegistrationNumber(), cab);
+
+        analyticsStorage.updateCabIdleStatus(cab, CabState.IDLE_START);
 
         return true;
     }
@@ -147,6 +153,11 @@ public class ServiceStorageImpl implements ServiceStorage {
 
         if(cab.getState().equals(CabState.IDLE)) {
             _cityLevelIdleCabs.get(cab.getCity()).offer(cab);
+            analyticsStorage.updateCabIdleStatus(cab, CabState.IDLE_START);
+        }
+
+        if(cab.getState().equals(CabState.TRIP_ASSIGNED))  {
+            analyticsStorage.updateCabIdleStatus(cab, CabState.IDLE_END);
         }
 
         return true;
@@ -176,6 +187,7 @@ public class ServiceStorageImpl implements ServiceStorage {
         );
 
         _allCabs.put(bookedCab.getRegistrationNumber(), bookedCab);
+        analyticsStorage.updateCabIdleStatus(bookedCab, CabState.IDLE_END);
 
         iterate();
 

@@ -18,6 +18,7 @@ public class ApplicationStartupImpl implements ApplicationStartup {
             appContext.initGoogleClient();
             appContext.initStorageContext();
             appContext.initStateMachine();
+            appContext.initAnalyticsStorage();
         }
         catch (Exception e) {
             log.error("error while loading app context. error: {}", e);

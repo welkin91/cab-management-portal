@@ -10,5 +10,7 @@ public interface ApplicationContext {
 
     public void initStateMachine();
 
+    public void initAnalyticsStorage();
+
     public GeoApiContext getGeoApiContext();
 }
