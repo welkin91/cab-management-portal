@@ -1,0 +1,10 @@
+{
+  "allowed_cities" : [
+    "BANGALORE",
+    "NEW_DELHI",
+    "NOIDA",
+    "MUMBAI",
+    "KOLKATA",
+    "CHENNAI"
+  ]
+}
