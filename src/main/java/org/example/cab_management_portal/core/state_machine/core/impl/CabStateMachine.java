@@ -22,24 +22,18 @@ public class CabStateMachine implements StateMachineImplementation {
             return _stateMachine;
         }
 
-        Set<ActionType> commonActions = new HashSet<>();
-        commonActions.add(ActionType.STATE_JUMP);
-
         State idle = State.builder()
                 .state(CabState.IDLE)
-                .actions(commonActions)
                 .nextState(CabState.TRIP_ASSIGNED)
                 .build();
 
         State tripAssigned = State.builder()
                 .state(CabState.TRIP_ASSIGNED)
-                .actions(commonActions)
                 .nextState(CabState.ON_TRIP)
                 .build();
 
         State onTrip = State.builder()
                 .state(CabState.ON_TRIP)
-                .actions(commonActions)
                 .nextState(CabState.IDLE)
                 .build();
 
