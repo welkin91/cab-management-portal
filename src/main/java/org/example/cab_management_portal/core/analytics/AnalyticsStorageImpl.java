@@ -32,8 +32,18 @@ public class AnalyticsStorageImpl implements AnalyticsStorage {
         _allStates = new ConcurrentHashMap<>();
     }
 
+    /**
+     * Updates latest status of a cab.
+     * This is used in to find total IDLE time of a cab, All states of a cab.
+     * @param cab
+     * @return  Return True in case of success.
+     *          Return False in case of any error.
+     */
     @Override
     public boolean updateCabStatus(Cab cab) {
+        /**
+         * Check if cab is not empty.
+         */
         if(cab == null || CommonUtils.isEmpty(cab.getRegistrationNumber())) {
             return false;
         }
@@ -54,26 +64,50 @@ public class AnalyticsStorageImpl implements AnalyticsStorage {
             return false;
         }
 
+        /**
+         * Add cab entry in all states map.
+         */
         _allStates.get(registrationNumber).put(entry.getLastUpdatedAt(), entry);
 
         return true;
     }
 
+    /**
+     *
+     * @param registrationNumber
+     * @param startTime
+     * @param endTime
+     * @return  Total time a cab was IDLE in the provided timeslots.
+     *          Returns exception in case, no data point is found in the time interval.
+     * @throws AnalyticsException
+     */
     public Long getCabIdleTimeInMillis(String registrationNumber, Long startTime, Long endTime) throws AnalyticsException {
         Long response = 0L;
 
+        /**
+         * Check if start time exists.
+         */
         if(startTime == null) {
             throw new AnalyticsException("start time not present.");
         }
 
+        /**
+         * check if end time exists.
+         */
         if(endTime == null) {
             throw new AnalyticsException("end time not present.");
         }
 
+        /**
+         * check if cab id is presnt.
+         */
         if(CommonUtils.isEmpty(registrationNumber)) {
             throw new AnalyticsException("Cab Id can not be empty.");
         }
 
+        /**
+         * check if data is present for a cab or not.
+         */
         if(!_allStates.containsKey(registrationNumber)) {
             throw new AnalyticsException("No data present for cabId: '" + registrationNumber + "'.");
         }
@@ -81,6 +115,9 @@ public class AnalyticsStorageImpl implements AnalyticsStorage {
         ConcurrentNavigableMap<Long, CabEntry> timeIntervals = null;
 
         try {
+            /**
+             * Extract all the cab entry objects between given time interval.
+             */
             timeIntervals = _allStates.get(registrationNumber).subMap(startTime, true, endTime, true);
         }
         catch (Exception e) {
@@ -92,16 +129,33 @@ public class AnalyticsStorageImpl implements AnalyticsStorage {
         return getIdleTime(iterator, registrationNumber, startTime, endTime);
     }
 
+    /**
+     *
+     * @param registrationNumber
+     * @param startTime
+     * @param endTime
+     * @return List<CabEntry> between the provided time interval.
+     * @throws AnalyticsException
+     */
     @Override
     public List<CabEntry> getCabStates(String registrationNumber, Long startTime, Long endTime) throws AnalyticsException {
+        /**
+         * check if start time is present.
+         */
         if(startTime == null) {
             throw new AnalyticsException("start time not present.");
         }
 
+        /**
+         * check if end time is present.
+         */
         if(endTime == null) {
             throw new AnalyticsException("end time not present.");
         }
 
+        /**
+         * check if car id is present.
+         */
         if(CommonUtils.isEmpty(registrationNumber)) {
             throw new AnalyticsException("Cab Id can not be empty.");
         }
@@ -113,6 +167,10 @@ public class AnalyticsStorageImpl implements AnalyticsStorage {
         ConcurrentNavigableMap<Long, CabEntry> timeIntervals = null;
 
         try {
+            /**
+             * extract all the data between the time interval.
+             * Please note that the time intervals are inclusive in nature.
+             */
             timeIntervals = _allStates.get(registrationNumber).subMap(startTime, true, endTime, true);
         }
         catch (Exception e) {
@@ -122,6 +180,9 @@ public class AnalyticsStorageImpl implements AnalyticsStorage {
         List<CabEntry> response = new ArrayList<>();
         Iterator iterator = timeIntervals.navigableKeySet().iterator();
 
+        /**
+         * Iterate over all the data in sorted fashion of time.
+         */
         while (iterator.hasNext()) {
             Long time = (Long) iterator.next();
             CabEntry entry = _allStates.get(registrationNumber).get(time);
@@ -136,6 +197,14 @@ public class AnalyticsStorageImpl implements AnalyticsStorage {
         return response;
     }
 
+    /**
+     *
+     * @param iterator
+     * @param registrationNumber
+     * @param startTime
+     * @param endTime
+     * @return Total time a cab was in IDLE state.
+     */
     private Long getIdleTime(Iterator iterator, String registrationNumber, Long startTime, Long endTime) {
         Long response = 0L;
 
