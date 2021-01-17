@@ -82,3 +82,7 @@ curl --location --request GET 'http://localhost:8080/v1/analytics/getCabStates' 
     "end_time": 1610959361000
 }'
 
+**10. Get demanded cities** \
+*curl call:*\
+curl --location --request GET 'http://localhost:8080/v1/analytics/getHighDemandCities' \
+--header 'Content-Type: application/json'
