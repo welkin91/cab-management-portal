@@ -138,11 +138,10 @@ public class AnalyticsController {
             produces = MediaType.APPLICATION_JSON_VALUE
     )
     public AppResponse getHighDemandCityData(
-            @RequestBody String requestBody,
             HttpServletRequest request
     ) throws AnalyticsException {
 
-        List<DemandEntry> data = new ArrayList<>();
+        List<DemandEntry> data = null;
         try {
             data = analytics.getDemandedCities();
         }
