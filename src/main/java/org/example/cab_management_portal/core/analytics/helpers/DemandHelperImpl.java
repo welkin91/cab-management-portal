@@ -73,8 +73,12 @@ public class DemandHelperImpl implements DemandHelper {
             return false;
         }
 
-        _cityLevelHighDemands.remove(city);
         _highDemandMaxHeap.remove(demandEntry);
+
+        demandEntry.setPriority(0);
+
+        _cityLevelHighDemands.put(city, demandEntry);
+        _highDemandMaxHeap.offer(demandEntry);
 
         return true;
     }
