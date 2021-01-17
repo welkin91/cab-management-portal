@@ -67,6 +67,14 @@ public class AnalyticsStorageImpl implements AnalyticsStorage {
 
         Long response = 0L;
 
+        if(startTime == null) {
+            throw new AnalyticsException("start time not present.");
+        }
+
+        if(endTime == null) {
+            throw new AnalyticsException("end time not present.");
+        }
+
         if(CommonUtils.isEmpty(registrationNumber)) {
             throw new AnalyticsException("Cab Id can not be empty.");
         }
@@ -81,7 +89,7 @@ public class AnalyticsStorageImpl implements AnalyticsStorage {
             timeIntervals = _idleCabs.get(registrationNumber).subMap(startTime, true, endTime, true);
         }
         catch (Exception e) {
-            throw new AnalyticsException("Something went wrong. error: " + e.getMessage());
+            throw new AnalyticsException("Something went wrong. error: " + e.toString());
         }
 
         Iterator iterator = timeIntervals.navigableKeySet().iterator();
