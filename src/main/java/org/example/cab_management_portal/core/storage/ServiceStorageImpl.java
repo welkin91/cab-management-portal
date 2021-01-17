@@ -65,15 +65,13 @@ public class ServiceStorageImpl implements ServiceStorage {
         _allCabs.put(cab.getRegistrationNumber(), cab);
 
         analyticsStorage.updateCabIdleStatus(cab, CabState.IDLE_START);
+        analyticsStorage.updateCabStatus(cab);
 
         return true;
     }
 
     @Override
     public boolean registerCity(String city) throws RegistrationException {
-
-        iterate();
-
         if(_allowedCities.contains(city)) {
             return false;
         }
@@ -150,6 +148,7 @@ public class ServiceStorageImpl implements ServiceStorage {
         cab.setLastUpdatedAt(System.currentTimeMillis());
 
         _allCabs.put(statusUpdate.getRegistrationNumber(), cab);
+        analyticsStorage.updateCabStatus(cab);
 
         if(cab.getState().equals(CabState.IDLE)) {
             _cityLevelIdleCabs.get(cab.getCity()).offer(cab);
@@ -165,8 +164,6 @@ public class ServiceStorageImpl implements ServiceStorage {
 
     @Override
     public Cab bookIdleCab(String city) throws TripException {
-        iterate();
-
         Cab bookedCab = null;
 
         if(!_allowedCities.contains(city)) {
@@ -187,9 +184,8 @@ public class ServiceStorageImpl implements ServiceStorage {
         );
 
         _allCabs.put(bookedCab.getRegistrationNumber(), bookedCab);
+        analyticsStorage.updateCabStatus(bookedCab);
         analyticsStorage.updateCabIdleStatus(bookedCab, CabState.IDLE_END);
-
-        iterate();
 
         return bookedCab;
     }
@@ -200,19 +196,5 @@ public class ServiceStorageImpl implements ServiceStorage {
                 (a, b) -> (int) (a.getLastUpdatedAt()/1000 - b.getLastUpdatedAt()/1000)
             )
         );
-    }
-
-    public void iterate() {
-        for(Map.Entry<String, PriorityBlockingQueue<Cab>> entry: _cityLevelIdleCabs.entrySet()) {
-            String city = entry.getKey();
-            PriorityBlockingQueue<Cab> queue = entry.getValue();
-
-            log.error("city: {}",city);
-            Iterator iterator = queue.iterator();
-            while (iterator.hasNext()) {
-                log.error(GsonUtils.toString(iterator.next()));
-            }
-            log.error("---------------------------------");
-        }
     }
 }

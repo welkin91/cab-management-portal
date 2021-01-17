@@ -3,10 +3,13 @@ package org.example.cab_management_portal.service.analytics;
 import lombok.extern.slf4j.Slf4j;
 import org.example.cab_management_portal.core.analytics.AnalyticsStorage;
 import org.example.cab_management_portal.exceptions.AnalyticsException;
+import org.example.cab_management_portal.models.dao.CabEntry;
 import org.example.cab_management_portal.models.dto.CabIdleTimeRequest;
 import org.example.cab_management_portal.models.dto.CabIdleTimeResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @Slf4j
@@ -33,5 +36,18 @@ public class CabAnalyticsImpl implements CabAnalytics {
                 .endTime(idleTimeRequest.getEndTime())
                 .totalIdleTime(idleTime)
                 .build();
+    }
+
+    @Override
+    public List<CabEntry> getAllStatesForCab(CabIdleTimeRequest idleTimeRequest) throws AnalyticsException {
+        if(idleTimeRequest == null) {
+            throw new AnalyticsException("Idle time request object is empty.");
+        }
+
+        return analyticsStorage.getCabStates(
+                idleTimeRequest.getRegistrationId(),
+                idleTimeRequest.getStartTime(),
+                idleTimeRequest.getEndTime()
+        );
     }
 }
