@@ -11,10 +11,7 @@ import org.example.cab_management_portal.service.analytics.CabAnalytics;
 import org.example.cab_management_portal.utils.ClassTransformationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -31,7 +28,7 @@ public class AnalyticsController {
             value = "Update location of a Cab",
             notes = "This is used in order to update the location of a Cab"
     )
-    @PostMapping(
+    @GetMapping(
             value = "/update",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE
