@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.example.cab_management_portal.core.analytics.AnalyticsStorage;
 import org.example.cab_management_portal.exceptions.AnalyticsException;
 import org.example.cab_management_portal.models.dao.CabEntry;
+import org.example.cab_management_portal.models.dao.DemandEntry;
 import org.example.cab_management_portal.models.dto.CabIdleTimeRequest;
 import org.example.cab_management_portal.models.dto.CabIdleTimeResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,5 +50,10 @@ public class CabAnalyticsImpl implements CabAnalytics {
                 idleTimeRequest.getStartTime(),
                 idleTimeRequest.getEndTime()
         );
+    }
+
+    @Override
+    public List<DemandEntry> getDemandedCities() throws AnalyticsException {
+        return analyticsStorage.getHighDemandCityData();
     }
 }

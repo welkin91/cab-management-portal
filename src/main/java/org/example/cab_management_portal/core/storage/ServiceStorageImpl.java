@@ -279,6 +279,7 @@ public class ServiceStorageImpl implements ServiceStorage {
          * Check if IDLE cabs are present.
          */
         if(_cityLevelIdleCabs.get(city).size() == 0) {
+            analyticsStorage.addDemand(city);
             throw new TripException("No cabs available in city: " + city + ". Please try again later.");
         }
 
@@ -293,6 +294,7 @@ public class ServiceStorageImpl implements ServiceStorage {
          * Update current state to analytics.
          */
         analyticsStorage.updateCabStatus(bookedCab);
+        analyticsStorage.removeDemand(city);
 
         return bookedCab;
     }

@@ -5,6 +5,7 @@ import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.example.cab_management_portal.exceptions.AnalyticsException;
 import org.example.cab_management_portal.models.dao.CabEntry;
+import org.example.cab_management_portal.models.dao.DemandEntry;
 import org.example.cab_management_portal.models.dto.CabIdleTimeRequest;
 import org.example.cab_management_portal.models.dto.CabIdleTimeResponse;
 import org.example.cab_management_portal.models.response.AppResponse;
@@ -15,6 +16,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController()
@@ -77,8 +79,8 @@ public class AnalyticsController {
     }
 
     @ApiOperation(
-            value = "Get total idle time a Cab",
-            notes = "This is used in order to total idle time of a Cab"
+            value = "Get all states of a Cab",
+            notes = "This is used in order to get states of a Cab"
     )
     @GetMapping(
             value = "/getCabStates",
@@ -123,6 +125,45 @@ public class AnalyticsController {
                 .statusCode("SUCCESS")
                 .statusMessage("Data aggregated successfully.")
                 .data(response)
+                .build();
+    }
+
+    @ApiOperation(
+            value = "Get demanded cities",
+            notes = "This is used in order to demanded cities"
+    )
+    @GetMapping(
+            value = "/getHighDemandCities",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public AppResponse getHighDemandCityData(
+            @RequestBody String requestBody,
+            HttpServletRequest request
+    ) throws AnalyticsException {
+
+        List<DemandEntry> data = new ArrayList<>();
+        try {
+            data = analytics.getDemandedCities();
+        }
+        catch (AnalyticsException e) {
+            return AppResponse.builder()
+                    .statusCode("ERROR")
+                    .statusMessage(e.getMessage())
+                    .build();
+        }
+
+        if(data == null || data.size() == 0) {
+            return AppResponse.builder()
+                    .statusCode("FAILED")
+                    .statusMessage("Demand Analytics not present right now.")
+                    .build();
+        }
+
+        return AppResponse.builder()
+                .statusCode("SUCCESS")
+                .statusMessage("Data aggregated successfully.")
+                .data(data)
                 .build();
     }
 }

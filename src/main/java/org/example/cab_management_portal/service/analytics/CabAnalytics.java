@@ -2,6 +2,7 @@ package org.example.cab_management_portal.service.analytics;
 
 import org.example.cab_management_portal.exceptions.AnalyticsException;
 import org.example.cab_management_portal.models.dao.CabEntry;
+import org.example.cab_management_portal.models.dao.DemandEntry;
 import org.example.cab_management_portal.models.dto.CabIdleTimeRequest;
 import org.example.cab_management_portal.models.dto.CabIdleTimeResponse;
 
@@ -12,4 +13,6 @@ public interface CabAnalytics {
     public CabIdleTimeResponse getIdleTimeForCab(CabIdleTimeRequest idleTimeRequest) throws AnalyticsException;
 
     public List<CabEntry> getAllStatesForCab(CabIdleTimeRequest idleTimeRequest) throws AnalyticsException;
+
+    public List<DemandEntry> getDemandedCities() throws AnalyticsException;
 }

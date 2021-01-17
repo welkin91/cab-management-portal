@@ -5,6 +5,7 @@ import org.example.cab_management_portal.exceptions.AnalyticsException;
 import org.example.cab_management_portal.exceptions.TransformationException;
 import org.example.cab_management_portal.models.dao.Cab;
 import org.example.cab_management_portal.models.dao.CabEntry;
+import org.example.cab_management_portal.models.dao.DemandEntry;
 import org.example.cab_management_portal.service.transformers.CabTransformer;
 import org.example.cab_management_portal.utils.CommonUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentNavigableMap;
 import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.concurrent.PriorityBlockingQueue;
 
 @Component
 @Slf4j
@@ -26,10 +28,17 @@ public class AnalyticsStorageImpl implements AnalyticsStorage {
     CabTransformer cabTransformer;
 
     Map<String, ConcurrentNavigableMap<Long, CabEntry>> _allStates;
+    Map<String, DemandEntry> _cityLevelHighDemands;
+    PriorityBlockingQueue<DemandEntry> _highDemandMaxHeap;
 
     @Override
     public void init() {
         _allStates = new ConcurrentHashMap<>();
+        _cityLevelHighDemands = new ConcurrentHashMap<>();
+        _highDemandMaxHeap = new PriorityBlockingQueue<>(
+                2^31 -1,
+                (a, b) -> b.getPriority() - a.getPriority()
+        );
     }
 
     /**
@@ -195,6 +204,70 @@ public class AnalyticsStorageImpl implements AnalyticsStorage {
         }
 
         return response;
+    }
+
+    @Override
+    public List<DemandEntry> getHighDemandCityData() throws AnalyticsException {
+        if(_highDemandMaxHeap.size() == 0) {
+            throw new AnalyticsException("Demand is not high in any of the registered cities.");
+        }
+
+        List<DemandEntry> response = new ArrayList<>();
+
+        Iterator iterator = _highDemandMaxHeap.iterator();
+        while (iterator.hasNext()) {
+            DemandEntry entry = (DemandEntry) iterator.next();
+            response.add(entry);
+        }
+
+        return response;
+    }
+
+    @Override
+    public boolean addDemand(String city) {
+        if(CommonUtils.isEmpty(city)) {
+            return false;
+        }
+
+        DemandEntry demandEntry = _cityLevelHighDemands.get(city);
+        if(demandEntry != null) {
+            _highDemandMaxHeap.remove(demandEntry);
+        }
+        else {
+            demandEntry = DemandEntry.builder()
+                    .cityId(city)
+                    .priority(0)
+                    .maxPriority(0)
+                    .build();
+        }
+
+        demandEntry.setPriority(demandEntry.getPriority() + 1);
+        if(demandEntry.getPriority() > demandEntry.getMaxPriority()) {
+            demandEntry.setMaxPriority(demandEntry.getPriority());
+            demandEntry.setMaxPriorityTimestamp(System.currentTimeMillis());
+        }
+
+        _highDemandMaxHeap.offer(demandEntry);
+        _cityLevelHighDemands.put(city, demandEntry);
+
+        return true;
+    }
+
+    @Override
+    public boolean removeDemand(String city) {
+        if(CommonUtils.isEmpty(city)) {
+            return false;
+        }
+
+        DemandEntry demandEntry = _cityLevelHighDemands.get(city);
+        if(demandEntry == null) {
+            return false;
+        }
+
+        _cityLevelHighDemands.remove(city);
+        _highDemandMaxHeap.remove(demandEntry);
+
+        return true;
     }
 
     /**
