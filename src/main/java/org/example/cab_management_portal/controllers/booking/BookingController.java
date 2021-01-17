@@ -41,7 +41,17 @@ public class BookingController {
             @RequestBody String requestBody,
             HttpServletRequest request
     ) throws TripException {
-        BookingRequest bookingRequest = ClassTransformationUtil.fromString(requestBody, BookingRequest.class);
+        BookingRequest bookingRequest = null;
+
+        try {
+            bookingRequest = ClassTransformationUtil.fromString(requestBody, BookingRequest.class);
+        }
+        catch (Exception e) {
+            return AppResponse.builder()
+                    .statusCode("ERROR")
+                    .statusMessage(e.getMessage())
+                    .build();
+        }
 
         Cab bookedCab = null;
 

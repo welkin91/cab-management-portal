@@ -39,7 +39,17 @@ public class LocationController {
             @RequestBody String requestBody,
             HttpServletRequest request
     ) throws LocationException {
-        UpdateLocationRequest locationRequest = ClassTransformationUtil.fromString(requestBody, UpdateLocationRequest.class);
+        UpdateLocationRequest locationRequest = null;
+
+        try {
+            locationRequest = ClassTransformationUtil.fromString(requestBody, UpdateLocationRequest.class);
+        }
+        catch (Exception e) {
+            return AppResponse.builder()
+                    .statusCode("ERROR")
+                    .statusMessage(e.getMessage())
+                    .build();
+        }
 
         boolean isUpdated = false;
 

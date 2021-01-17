@@ -41,7 +41,18 @@ public class RegistrationController {
             @RequestBody String requestBody,
             HttpServletRequest request
     ) throws RegistrationException {
-        RegisterCabRequest cabRequest = ClassTransformationUtil.fromString(requestBody, RegisterCabRequest.class);
+        RegisterCabRequest cabRequest = null;
+
+        try {
+            cabRequest = ClassTransformationUtil.fromString(requestBody, RegisterCabRequest.class);
+        }
+        catch (Exception e) {
+            return AppResponse.builder()
+                    .statusCode("ERROR")
+                    .statusMessage(e.getMessage())
+                    .build();
+        }
+
         boolean isInserted = false;
 
         try {
@@ -81,7 +92,18 @@ public class RegistrationController {
             HttpServletRequest request
     ) throws RegistrationException {
 
-        RegisterCityRequest cityRequest = ClassTransformationUtil.fromString(requestBody, RegisterCityRequest.class);
+        RegisterCityRequest cityRequest = null;
+
+        try {
+            cityRequest = ClassTransformationUtil.fromString(requestBody, RegisterCityRequest.class);
+        }
+        catch (Exception e) {
+            return AppResponse.builder()
+                    .statusCode("ERROR")
+                    .statusMessage(e.getMessage())
+                    .build();
+        }
+
         boolean isInserted = false;
 
         try {

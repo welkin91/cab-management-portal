@@ -41,7 +41,17 @@ public class StateController {
             HttpServletRequest request
     ) throws StateException {
 
-        UpdateStateRequest stateRequest = ClassTransformationUtil.fromString(requestBody, UpdateStateRequest.class);
+        UpdateStateRequest stateRequest = null;
+
+        try {
+            stateRequest = ClassTransformationUtil.fromString(requestBody, UpdateStateRequest.class);
+        }
+        catch (Exception e) {
+            return AppResponse.builder()
+                    .statusCode("ERROR")
+                    .statusMessage(e.getMessage())
+                    .build();
+        }
 
         boolean isUpdated = false;
 
